@@ -44,19 +44,32 @@ function Dwoo_Plugin_load_templates_compile(Dwoo_Compiler $compiler, $file)
 
 	$cmp = clone $compiler;
 	$cmp->compile($compiler->getDwoo(), $tpl);
+	$usedTemplates = array($tpl);
 	foreach ($cmp->getTemplatePlugins() as $template=>$args) {
-		$compiler->addTemplatePlugin($template, $args['params'], $args['uuid'], $args['body']);
+		if (isset($args['sourceTpl'])) {
+			$sourceTpl = $args['sourceTpl'];
+		} else {
+			$sourceTpl = $tpl;
+		}
+
+		$compiler->addTemplatePlugin($template, $args['params'], $args['uuid'], $args['body'], $sourceTpl);
+
+		if (!in_array($sourceTpl, $usedTemplates, true)) {
+			$usedTemplates[] = $sourceTpl;
+		}
 	}
 	foreach ($cmp->getUsedPlugins() as $plugin=>$type) {
 		$compiler->addUsedPlugin($plugin, $type);
 	}
 
 	$out = '\'\';// checking for modification in '.$resource.':'.$identifier."\r\n";
+
+	$modCheck = array_filter(array_map(function(Dwoo_ITemplate $usedTemplate) {
+		return $usedTemplate->getIsModifiedCode();
+	}, $usedTemplates));
 	
-	$modCheck = $tpl->getIsModifiedCode();
-	
-	if ($modCheck) {
-		$out .= 'if (!('.$modCheck.')) { ob_end_clean(); return false; }';
+	if (count($modCheck)) {
+		$out .= 'if (!('.implode(') || !(', $modCheck).')) { ob_end_clean(); return false; }';
 	} else {
 		$out .= 'try {
 	$tpl = $this->templateFactory("'.$resource.'", "'.$identifier.'");

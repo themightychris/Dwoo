@@ -518,10 +518,10 @@ class Dwoo_Compiler implements Dwoo_ICompiler
 	 * @param string $uuid unique id of the function
 	 * @param string $body function php code
 	 */
-	public function addTemplatePlugin($name, array $params, $uuid, $body = null)
+	public function addTemplatePlugin($name, array $params, $uuid, $body = null, Dwoo_ITemplate $sourceTpl = null)
 	{
 		if (!array_key_exists($name, $this->templatePlugins) || $this->templatePlugins[$name]['uuid'] == $uuid) {
-			$this->templatePlugins[$name] = array('params'=> $params, 'body' => $body, 'uuid' => $uuid);
+			$this->templatePlugins[$name] = array('params'=> $params, 'body' => $body, 'uuid' => $uuid, 'sourceTpl' => $sourceTpl);
 		}
 	}
 
