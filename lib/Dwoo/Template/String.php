@@ -374,7 +374,7 @@ class Dwoo_Template_String implements Dwoo_ITemplate
 			if (extension_loaded('Zend OPcache')) {
 				opcache_invalidate($compiledFile);
 			} elseif (extension_loaded('apc')) {
-				apc_delete_file($compiledFile);
+				apc_compile_file($compiledFile);
 			}
 
 			self::$cache['compiled'][$this->compileId] = true;
